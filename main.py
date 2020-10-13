@@ -1,10 +1,6 @@
+import io
 import hashlib
-import numpy as np
-from PIL import Image, ImageDraw
-
-BACKGROUND_COLOR = (255, 255, 255)
-hash_in_hexa = None
-
+from helper import flat_matrix, pixel_generation, generate_color, draw_identicon, generate_matrix, mirror_matrix
 
 # Hash the input
 # Generate a 6*6 matrix
@@ -19,129 +15,7 @@ hash_in_hexa = None
 # Generating avatar based on username
 
 
-def flat_matrix(matrix):
-    flatten_list = [item for row in matrix for item in row]
-    return flatten_list
-
-
-def pixel_generation(matrix):
-    pixels = []
-    for i, val in enumerate(matrix):
-        x = int(i % 5 * 50)+20
-        y = int(i//5 * 50)+20
-
-        left_top = (x, y)
-        right_bottom = (x+50, y+50)
-        pixels.append([left_top, right_bottom])
-
-    return pixels
-
-
-def generate_color(hash):
-    r, g, b = tuple(hash[i:i+2] for i in range(0, 6, 2))
-    return f'#{r}{g}{b}'
-
-
-def draw_identicon(color, flatten_list, pixels):
-    identicon = Image.new('RGB', (50*5+20*2, 50*5+20*2), BACKGROUND_COLOR)
-    draw = ImageDraw.Draw(identicon)
-    for grid, pixels in zip(flatten_list, pixels):
-        if grid != 0:
-            draw.rectangle(pixels, fill=color)
-
-    identicon.show()
-
-
-def generate_matrix(hash):
-    half_matrix = [[hash[col:col+2]
-                    for col in range(row, row+6, 2)]for row in range(0, 30, 6)]
-
-    return half_matrix
-
-
-def mirror_matrix(half_matrix):
-    new_matrix = []
-    for items in half_matrix:
-        mirror_items = list(reversed(items))
-        new_matrix.append(items+mirror_items[1:])
-
-    new_matrix = m3(new_matrix)
-    return new_matrix
-
-
-def m1(matrix):
-    # Comparing adjacent values in the matrix
-
-    pattern_matrix = []
-    for letter in matrix:
-        row = []
-        for position, value in enumerate(letter):
-            if position < 4 and int(letter[position+1], base=16) > int(value, base=16):
-                row.append(0)
-            else:
-                row.append(1)
-        pattern_matrix.append(row)
-
-    return pattern_matrix
-
-
-def m2(matrix):
-    # It generates patterns similar to face
-
-    pattern_array = []
-    total = 0
-
-    for row in matrix:
-        for letter in row:
-            ascii_value = int(letter, base=16)
-            total += ascii_value
-
-    avg = total/25
-
-    for row in matrix:
-        updated_row = []
-        for item in row:
-            if int(item, base=16) > avg:
-                updated_row.append(0)
-            else:
-                updated_row.append(1)
-        pattern_array.append(updated_row)
-
-    return pattern_array
-
-
-def m3(matrix):  # Not suitable
-    pattern_array = []
-    count = {}
-    median = 0
-
-    for rows in matrix:
-        for letter in rows:
-            count[letter] = count.get(letter, 0)+1
-            if count[letter] > median:
-                median = int(letter, base=16)
-
-    for row in matrix:
-        updated_row = []
-        for letter in row:
-            if int(letter, base=16) < median:
-                updated_row.append(0)
-            else:
-                updated_row.append(1)
-        pattern_array.append(updated_row)
-    return pattern_array
-
-
-def m4(matrix):
-    # Based on ODD-EVEN matrix value
-
-    pattern_matrix = [[int(item, base=16) if int(item, base=16) %
-                       2 == 0 else 0 for item in row]for row in matrix]
-    return pattern_matrix
-
-
-def render(name):
-    global hash_in_hexa
+def generate_identicon(name):
     # hashlib takes the argument in byte, hence converting the string input to bytes
     byte_value = hashlib.md5(name.encode())
 
@@ -153,8 +27,13 @@ def render(name):
     matrix = mirror_matrix(half_matrix)
     flatten_list = flat_matrix(matrix)
     pixels = pixel_generation(flatten_list)
-    draw_identicon(color, flatten_list, pixels)
+    identicon = draw_identicon(color, flatten_list, pixels)
+
+    byte_array = io.BytesIO()
+    identicon.save(byte_array, format='PNG')
+
+    return bt.getvalue()
 
 
 # user_input = input('Enter the name :')
-render('Testing')
+generate_identicon('Testing')
