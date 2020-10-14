@@ -1,7 +1,22 @@
+import io
 import logic
 from PIL import Image, ImageDraw
 
 BACKGROUND_COLOR = (255, 255, 255)
+
+
+def generate_identicon(hash_in_hexa):
+    color = generate_color(hash_in_hexa)
+    half_matrix = generate_matrix(hash_in_hexa)
+    matrix = mirror_matrix(half_matrix)
+    flatten_list = flat_matrix(matrix)
+    pixels = pixel_generation(flatten_list)
+    identicon = draw_identicon(color, flatten_list, pixels)
+
+    byte_array = io.BytesIO()
+    identicon.save(byte_array, format='PNG')
+
+    return byte_array.getvalue()
 
 
 def flat_matrix(matrix):
