@@ -1,6 +1,8 @@
 import io
 import logic
+import base64
 from PIL import Image, ImageDraw
+import io
 
 BACKGROUND_COLOR = (255, 255, 255)
 
@@ -15,8 +17,8 @@ def generate_identicon(hash_in_hexa):
 
     byte_array = io.BytesIO()
     identicon.save(byte_array, format='PNG')
-
-    return byte_array.getvalue()
+    img_base64 = base64.b64encode(byte_array.getvalue()).decode('ascii')
+    return img_base64
 
 
 def flat_matrix(matrix):
@@ -65,5 +67,5 @@ def mirror_matrix(half_matrix):
         mirror_items = list(reversed(items))
         new_matrix.append(items+mirror_items[1:])
 
-    new_matrix = logic.m3(new_matrix)
+    new_matrix = logic.m4(new_matrix)
     return new_matrix

@@ -1,6 +1,5 @@
 import random
 import hashlib
-from utils import flat_matrix, pixel_generation, generate_color, draw_identicon, generate_matrix, mirror_matrix
 
 # Hash the input
 # Generate a 6*6 matrix
@@ -43,5 +42,5 @@ def generate_random_identicon():
 
 
 # user_input = input('Enter the name :')
-generate_unique_identicon('Testing')
-generate_random_identicon()
+print(generate_unique_identicon('Testing'))
+print(generate_random_identicon())
